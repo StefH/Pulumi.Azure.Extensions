@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Pulumi.Azure.Extensions.Utils;
@@ -8,6 +9,11 @@ namespace Pulumi.Azure.Extensions.Storage
 {
     public sealed class BlobCollectionArgs : ResourceArgs
     {
+        /// <summary>
+        /// An absolute path to a folder on the local file system.
+        /// </summary>
+        public string Source { get; set; }
+
         /// <summary>
         /// The access tier of the storage blob. Possible values are `Archive`, `Cool` and `Hot`.
         /// </summary>
@@ -40,20 +46,22 @@ namespace Pulumi.Azure.Extensions.Storage
         public Input<string> Type { get; set; }
     }
 
-    public sealed class BlobCollection
+    public sealed class BlobCollection : ComponentResource
     {
         private const string SearchPattern = "*.*";
 
         /// <summary>
         /// Upload all files and folders from a sourceFolder to a Blob Storage Account in Azure.
         /// </summary>
-        /// <param name="sourceFolder">An absolute path to a folder on the local file system.</param>
-        /// <param name="args">The arguments used to populate the <see cref="Blob"/> resources.</param>
-        public BlobCollection(string sourceFolder, BlobCollectionArgs args)
+        /// <param name="name">The unique name of the resource</param>
+        /// <param name="args">The arguments used to populate this resource's properties</param>
+        /// <param name="options">A bag of options that control this resource's behavior</param>
+        public BlobCollection(string name, BlobCollectionArgs args, ComponentResourceOptions? options = null) :
+            base("azure-extensions:storage:BlobCollection", name, options)
         {
-            if (string.IsNullOrEmpty(sourceFolder))
+            if (string.IsNullOrEmpty(name))
             {
-                throw new ArgumentNullException(nameof(sourceFolder));
+                throw new ArgumentNullException(nameof(name));
             }
 
             if (args == null)
@@ -61,30 +69,51 @@ namespace Pulumi.Azure.Extensions.Storage
                 throw new ArgumentNullException(nameof(args));
             }
 
-            int sourceFolderLength = sourceFolder.Length + 1;
-
-            var files = Directory.EnumerateFiles(sourceFolder, SearchPattern, SearchOption.AllDirectories)
-                .Select(path => new
-                {
-                    info = new FileInfo(path),
-                    name = path.Remove(0, sourceFolderLength).Replace(Path.PathSeparator, '/'), // Make the name Azure Storage compatible
-                })
-                .Where(file => file.info.Length > 0) // https://github.com/pulumi/pulumi-azure/issues/544
-            ;
-
-            foreach (var file in files)
+            if (string.IsNullOrEmpty(args.Source))
             {
-                _ = new Blob(file.name, new BlobArgs
+                throw new ArgumentNullException(nameof(args.Source));
+            }
+
+            foreach (var file in GetAllFiles(args.Source))
+            {
+                var blobArgs = new BlobArgs
                 {
                     AccessTier = args.AccessTier,
+                    ContentType = MimeTypeMap.GetMimeType(file.info.Extension),
                     Name = file.name,
+                    Parallelism = args.Parallelism,
+                    Source = new FileAsset(file.info.FullName),
                     StorageAccountName = args.StorageAccountName,
                     StorageContainerName = args.StorageContainerName,
-                    Type = args.Type,
-                    Source = new FileAsset(file.info.FullName),
-                    ContentType = MimeTypeMap.GetMimeType(file.info.Extension)
-                });
+                    Type = args.Type
+                };
+
+                var blobOptions = new CustomResourceOptions
+                {
+                    Parent = this
+                };
+
+                _ = new Blob(file.name, blobArgs, blobOptions);
             }
+        }
+
+        private static IEnumerable<(FileInfo info, string name)> GetAllFiles(string source)
+        {
+            if (Directory.Exists(source))
+            {
+                int sourceFolderLength = source.Length + 1;
+
+                return Directory.EnumerateFiles(source, SearchPattern, SearchOption.AllDirectories)
+                    .Select(path =>
+                    (
+                        new FileInfo(path),
+                        path.Remove(0, sourceFolderLength).Replace(Path.PathSeparator, '/') // Make the name Azure Storage compatible
+                    ))
+                    .Where(file => file.Item1.Length > 0) // https://github.com/pulumi/pulumi-azure/issues/544
+                ;
+            }
+
+            throw new NotSupportedException("The source provided is not a folder.");
         }
     }
 }
