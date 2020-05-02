@@ -7,7 +7,7 @@ namespace Pulumi.Azure.Extensions.Utils
     /// <summary>
     /// Copied from https://github.com/samuelneff/MimeTypeMap
     /// </summary>
-    public static class MimeTypeMap
+    internal static class MimeTypeMap
     {
         private const string Dot = ".";
         private const string DefaultMimeType = "application/octet-stream";
