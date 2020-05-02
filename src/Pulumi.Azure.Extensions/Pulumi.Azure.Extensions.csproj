@@ -9,4 +9,8 @@
     <ProjectGuid>{C7F2E3E7-05CE-4409-AC94-A0557B5B8C13}</ProjectGuid>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Pulumi.Azure" Version="3.0.0" />
+  </ItemGroup>
+
 </Project>

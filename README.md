@@ -9,4 +9,18 @@ The following extensions are defined:
 
 #### BlobCollection
 
-...todo...
+When you want to publish all files from a Blazor WASM website to an Azure Storage Static Website, use the code below:
+
+``` c#
+string sourceFolder = "C:\Users\xxx\Documents\GitHub\BlazorApp\publish\wwwroot";
+var blobCollection = new BlobCollection(sourceFolder, new BlobCollectionArgs
+{
+    // Required
+    Type = BlobTypes.Block,
+    StorageAccountName = storageAccount.Name,
+    StorageContainerName = "$web",
+    AccessTier = BlobAccessTiers.Hot
+});
+```
+
+There is no need to specify the ContentType for each file, this is automatically resolved using [MimeTypeMap](https://github.com/samuelneff/MimeTypeMap).
