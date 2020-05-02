@@ -4,15 +4,15 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionPrefix>0.0.2</VersionPrefix>
     <Copyright>Copyright © 2020 Stef Heyenrath</Copyright>
     <Authors>Stef Heyenrath</Authors>
     <PackageReleaseNotes>See CHANGELOG.md</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageProjectUrl>https://github.com/StefH/Pulumi.Azure.Constants</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/StefH/Pulumi.Azure.Extensions</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/StefH/Pulumi.Azure.Constants</RepositoryUrl>
+    <RepositoryUrl>https://github.com/StefH/Pulumi.Azure.Extensions</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
