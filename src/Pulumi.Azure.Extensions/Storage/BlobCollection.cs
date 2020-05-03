@@ -74,15 +74,15 @@ namespace Pulumi.Azure.Extensions.Storage
                 throw new ArgumentNullException(nameof(args.Source));
             }
 
-            foreach (var file in GetAllFiles(args.Source))
+            foreach (var (fileInfo, blobName) in GetAllFiles(args.Source))
             {
                 var blobArgs = new BlobArgs
                 {
                     AccessTier = args.AccessTier,
-                    ContentType = MimeTypeMap.GetMimeType(file.info.Extension),
-                    Name = file.name,
+                    ContentType = MimeTypeMap.GetMimeType(fileInfo.Extension),
+                    Name = blobName,
                     Parallelism = args.Parallelism,
-                    Source = new FileAsset(file.info.FullName),
+                    Source = new FileAsset(fileInfo.FullName),
                     StorageAccountName = args.StorageAccountName,
                     StorageContainerName = args.StorageContainerName,
                     Type = args.Type
@@ -93,11 +93,11 @@ namespace Pulumi.Azure.Extensions.Storage
                     Parent = this
                 };
 
-                _ = new Blob(file.name, blobArgs, blobOptions);
+                _ = new Blob(blobName, blobArgs, blobOptions);
             }
         }
 
-        private static IEnumerable<(FileInfo info, string name)> GetAllFiles(string source)
+        private static IEnumerable<(FileInfo fileInfo, string blobName)> GetAllFiles(string source)
         {
             if (Directory.Exists(source))
             {
@@ -107,13 +107,13 @@ namespace Pulumi.Azure.Extensions.Storage
                     .Select(path =>
                     (
                         new FileInfo(path),
-                        path.Remove(0, sourceFolderLength).Replace(Path.PathSeparator, '/') // Make the name Azure Storage compatible
+                        path.Remove(0, sourceFolderLength).Replace(Path.PathSeparator, '/') // Make the blobName Azure Storage compatible
                     ))
                     .Where(file => file.Item1.Length > 0) // https://github.com/pulumi/pulumi-azure/issues/544
                 ;
             }
 
-            throw new NotSupportedException("The source provided is not a folder.");
+            throw new NotSupportedException("The source provided must be a folder.");
         }
     }
 }
