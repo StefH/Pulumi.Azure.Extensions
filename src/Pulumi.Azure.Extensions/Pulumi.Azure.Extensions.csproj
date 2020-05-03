@@ -10,7 +10,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pulumi.Azure" Version="3.0.0" />
+    <None Include="../../resources/icon.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Pulumi.Azure" Version="3.4.0" />
   </ItemGroup>
 
 </Project>

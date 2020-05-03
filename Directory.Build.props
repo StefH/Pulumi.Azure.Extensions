@@ -19,10 +19,6 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="../../resources/icon.png" Pack="true" PackagePath=""/>
-  </ItemGroup>
-
   <Choose>
     <!-- The environment variable `Prerelease` is set in the azure-pipelines.yml file. -->
     <When Condition=" '$(Prerelease)' != '' ">
