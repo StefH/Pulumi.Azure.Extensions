@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Pulumi.Azure.Constants;
 using Pulumi.Azure.Extensions.Storage;
+using Pulumi.Azure.Storage;
 using Xunit;
 
 namespace Pulumi.Azure.Extensions.Tests.Storage
@@ -12,6 +13,29 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
     {
         private const string BlobCollectionName = "test";
         private static string FilesFolder => Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "netcoreapp3.1", "files");
+
+private class BlobStack : Stack
+{
+    public BlobStack()
+    {
+        var blobArgs = new BlobArgs
+        {
+            AccessTier = BlobAccessTiers.Hot,
+            Name = "test",
+            Source = new FileAsset(Path.Combine(FilesFolder, "TextFile1.txt")),
+            StorageAccountName = "sa",
+            StorageContainerName = "sa",
+            Type = BlobTypes.Block
+        };
+
+        var blobOptions = new CustomResourceOptions
+        {
+            Parent = this
+        };
+
+        _ = new Blob("test", blobArgs, blobOptions);
+    }
+}
 
         private class BlobCollectionStackFolderNoFiles : Stack
         {
@@ -60,6 +84,20 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
                 _ = new BlobCollection(BlobCollectionName, args);
             }
         }
+
+[Fact]
+public async Task Blob()
+{
+    // Arrange and Act
+    var resources = await Testing.RunAsync<BlobStack>();
+
+    // Assert
+    resources.Length.Should().Be(2);
+    var blob = resources.OfType<Blob>().FirstOrDefault();
+
+    Assert.NotNull(blob);
+    blob.GetResourceName().Should().Be("test");
+}
 
         [Fact]
         public async Task Folder_NoFiles()
