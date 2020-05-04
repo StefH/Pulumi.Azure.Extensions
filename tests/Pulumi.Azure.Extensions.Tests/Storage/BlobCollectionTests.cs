@@ -85,13 +85,13 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             }
         }
 
-        private class BlobCollectionStackZipFile : Stack
+        private class BlobCollectionStackFile : Stack
         {
-            public BlobCollectionStackZipFile()
+            public BlobCollectionStackFile()
             {
                 var args = new BlobCollectionArgs
                 {
-                    Source = Path.Combine(FilesFolder, "files.zip"),
+                    Source = Path.Combine(FilesFolder, "x", "TextFile3.txt"),
                     StorageAccountName = "sa",
                     StorageContainerName = "sc",
                     Type = BlobTypes.Block
@@ -100,6 +100,22 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
                 _ = new BlobCollection(BlobCollectionName, args);
             }
         }
+
+        //private class BlobCollectionStackZipFile : Stack
+        //{
+        //    public BlobCollectionStackZipFile()
+        //    {
+        //        var args = new BlobCollectionArgs
+        //        {
+        //            Source = Path.Combine(FilesFolder, "files.zip"),
+        //            StorageAccountName = "sa",
+        //            StorageContainerName = "sc",
+        //            Type = BlobTypes.Block
+        //        };
+
+        //        _ = new BlobCollection(BlobCollectionName, args);
+        //    }
+        //}
 
         [Fact]
         public async Task Blob()
@@ -162,6 +178,25 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             blobCollection.GetResourceName().Should().Be("test");
         }
 
+        [Fact]
+        public async Task File()
+        {
+            // Arrange and Act
+            var resources = await Testing.RunAsync<BlobCollectionStackFile>();
+
+            // Assert
+            resources.Length.Should().Be(3);
+            var blobCollection = resources.OfType<BlobCollection>().FirstOrDefault();
+
+            Assert.NotNull(blobCollection);
+            blobCollection.GetResourceName().Should().Be("test");
+
+            var blobs = resources.OfType<Blob>().ToList();
+            Assert.NotNull(blobs);
+
+            blobs.Count.Should().Be(1);
+        }
+
         //[Fact]
         //public async Task ZipFile()
         //{
@@ -169,11 +204,16 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
         //    var resources = await Testing.RunAsync<BlobCollectionStackZipFile>();
 
         //    // Assert
-        //    resources.Length.Should().Be(2);
+        //    resources.Length.Should().Be(3);
         //    var blobCollection = resources.OfType<BlobCollection>().FirstOrDefault();
 
         //    Assert.NotNull(blobCollection);
         //    blobCollection.GetResourceName().Should().Be("test");
+
+        //    var blobs = resources.OfType<Blob>().ToList();
+        //    Assert.NotNull(blobs);
+
+        //    blobs.Count.Should().Be(1);
         //}
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using Pulumi.Azure.Extensions.Utils;
 using Pulumi.Azure.Storage;
@@ -104,13 +103,6 @@ namespace Pulumi.Azure.Extensions.Storage
             var fileInfo = new FileInfo(source);
             if (fileInfo.Exists)
             {
-                //if (string.Equals(fileInfo.Extension, ".zip", StringComparison.OrdinalIgnoreCase))
-                //{
-                //    using var tempStorage = new TempStorage();
-                //    ZipFile.ExtractToDirectory(source, tempStorage.Path);
-                //    return GetAllFiles(tempStorage.Path);
-                //}
-
                 return new (FileInfo fileInfo, string blobName)[] { (fileInfo, fileInfo.Name) };
             }
 

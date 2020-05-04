@@ -3,30 +3,35 @@ using System.IO;
 
 namespace Pulumi.Azure.Extensions.Utils
 {
-    /// <summary>
-    /// Represents a temporary storage on file system.
-    /// </summary>
-    public sealed class TempStorage : IDisposable
+    public sealed class TempFolder : IDisposable
     {
-        public TempStorage() : this(FileUtils.GetTemporaryDirectory())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TempStorage"/> class.
-        /// </summary>
-        /// <param name="path">The path to use as temp storage.</param>
-        public TempStorage(string path)
-        {
-            Path = path;
-            Clear();
-            Create();
-        }
+        private readonly bool _isTemp;
 
         public string Path { get; }
 
-        private void Create()
+        public TempFolder(string path, bool isTemp)
         {
+            _isTemp = isTemp;
+
+            if (isTemp)
+            {
+                Path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString()); ;
+                Clear(true);
+                Create(true);
+            }
+            else
+            {
+                Path = path;
+            }
+        }
+
+        private void Create(bool isTemp)
+        {
+            if (!isTemp)
+            {
+                return;
+            }
+
             try
             {
                 if (!Directory.Exists(Path))
@@ -39,8 +44,13 @@ namespace Pulumi.Azure.Extensions.Utils
             }
         }
 
-        public void Clear()
+        private void Clear(bool isTemp)
         {
+            if (!isTemp)
+            {
+                return;
+            }
+
             try
             {
                 if (Directory.Exists(Path))
@@ -54,7 +64,7 @@ namespace Pulumi.Azure.Extensions.Utils
         }
 
         /// <summary>
-        /// An indicator whether this object is beeing actively disposed or not.
+        /// An indicator whether this object is being actively disposed or not.
         /// </summary>
         private bool _disposed;
 
@@ -62,20 +72,6 @@ namespace Pulumi.Azure.Extensions.Utils
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Throws an exception if something is tried to be done with an already disposed object.
-        /// </summary>
-        /// <remarks>
-        /// All public methods of the class must first call this.
-        /// </remarks>
-        public void ThrowIfDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
         }
 
         /// <summary>
@@ -88,7 +84,7 @@ namespace Pulumi.Azure.Extensions.Utils
         /// </remarks>
         private void ReleaseManagedResources()
         {
-            Clear();
+            Clear(_isTemp);
         }
 
         /// <summary>
