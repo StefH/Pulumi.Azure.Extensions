@@ -36,7 +36,7 @@
     <None Update="files\TextFile1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="files\TextFile2.txt">
+    <None Update="files\HtmlFile1.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="files\x\TextFile3.txt">

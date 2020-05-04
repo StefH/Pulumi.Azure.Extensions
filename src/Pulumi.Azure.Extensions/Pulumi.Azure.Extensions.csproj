@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pulumi.Azure" Version="3.4.0" />
+    <PackageReference Include="Pulumi.Azure" Version="3.0.0" />
   </ItemGroup>
 
 </Project>
