@@ -1,5 +1,6 @@
 # Pulumi.Azure.Extensions
 [![NuGet](https://buildstats.info/nuget/Pulumi.Azure.Extensions)](https://www.nuget.org/packages/Pulumi.Azure.Extensions)
+[![codecov](https://codecov.io/gh/StefH/Pulumi.Azure.Extensions/branch/master/graph/badge.svg)](https://codecov.io/gh/StefH/Pulumi.Azure.Extensions)
 
 Additional extensions for Microsoft Azure resources with [Pulumi Azure](https://github.com/pulumi/pulumi-azure).
 

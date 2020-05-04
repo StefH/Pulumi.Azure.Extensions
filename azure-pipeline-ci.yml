@@ -1,0 +1,69 @@
+pool:
+  vmImage: 'windows-2019'
+
+variables:
+  Prerelease: 'ci'
+  buildId: "1$(Build.BuildId)"
+  buildProjects: '**/src/**/*.csproj'
+
+steps:
+# Print buildId
+- script: |
+    echo "BuildId = $(buildId)"
+  displayName: 'Print buildId'
+
+# Install Tools (SonarScanner)
+- script: |
+    dotnet tool install --global dotnet-sonarscanner
+  displayName: Install Tools (SonarScanner)
+
+# Build source, tests and run tests with coverage
+- script: |
+    dotnet test ./tests/Pulumi.Azure.Extensions.Tests/Pulumi.Azure.Extensions.Tests.csproj --configuration Debug --logger trx /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+  displayName: 'Build source, tests and run tests with coverage'
+
+# Upload coverage to codecov.io
+- script: |
+    %USERPROFILE%\.nuget\packages\codecov\1.10.0\tools\codecov.exe -f "./tests/Pulumi.Azure.Extensions.Tests/coverage.opencover.xml" -t $(CODECOV_TOKEN)
+  displayName: Upload coverage to codecov.io
+
+# https://github.com/microsoft/azure-pipelines-tasks/issues/12212
+- task: PublishTestResults@2
+  condition: and(succeeded(), eq(variables['PUBLISH_TESTRESULTS'], 'yes'))
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+
+# Based on https://whereslou.com/2018/09/versioning-and-publishing-nuget-packages-automatically-using-azure-devops-pipelines/
+- task: DotNetCoreCLI@2
+  displayName: Build Release
+  inputs:
+    command: 'build'
+    arguments: /p:Configuration=Release # https://github.com/MicrosoftDocs/vsts-docs/issues/1976
+    projects: $(buildProjects)
+
+- task: DotNetCoreCLI@2
+  displayName: Pack
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  inputs:
+    command: pack
+    configuration: 'Release'
+    packagesToPack: $(buildProjects)
+    nobuild: true
+    packDirectory: '$(Build.ArtifactStagingDirectory)/packages'
+    verbosityPack: 'normal'
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish Artifacts
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+
+# https://github.com/NuGet/Home/issues/8148
+- task: DotNetCoreCLI@2
+  displayName: Push to MyGet
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')) # Do not run for PullRequests
+  inputs:
+    command: custom
+    custom: nuget
+    arguments: push $(Build.ArtifactStagingDirectory)\packages\*.nupkg -n true -s https://www.myget.org/F/pulumi-azure-extensions/api/v3/index.json -k $(MyGetKey)
