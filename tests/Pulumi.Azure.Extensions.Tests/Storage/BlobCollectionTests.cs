@@ -129,6 +129,8 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
 
             Assert.NotNull(blob);
             blob.GetResourceName().Should().Be("test");
+
+            (await blob.Name.GetValueAsync()).Should().Be("test");
         }
 
         [Fact]
@@ -162,6 +164,11 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             Assert.NotNull(blobs);
 
             blobs.Count.Should().Be(4);
+
+            blobs[0].Name.GetValue().Should().Be("files.zip");
+            blobs[1].Name.GetValue().Should().Be("HtmlFile1.html");
+            blobs[2].Name.GetValue().Should().Be("TextFile1.txt");
+            blobs[3].Name.GetValue().Should().Be("x\\TextFile3.txt");
         }
 
         [Fact]
