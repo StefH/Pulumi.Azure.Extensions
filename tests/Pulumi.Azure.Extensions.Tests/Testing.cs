@@ -24,18 +24,18 @@ namespace Pulumi.Azure.Extensions.Tests
         private static ImmutableDictionary<string, object> Convert(ImmutableDictionary<string, object> dictionary)
         {
             var builder = ImmutableDictionary.CreateBuilder<string, object>();
-            foreach (var entry in dictionary)
+            foreach (var (key, value) in dictionary)
             {
                 // https://github.com/pulumi/pulumi/issues/4558
-                switch (entry.Value)
+                switch (value)
                 {
                     case int _:
                     case double _:
                     case bool _:
-                    case string s:
+                    case string _:
                     case ImmutableArray<object> _:
                     case ImmutableDictionary<string, object> _:
-                        builder.Add(entry.Key, entry.Value);
+                        builder.Add(key, value);
                         break;
                 }
             }
