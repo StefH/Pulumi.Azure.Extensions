@@ -140,11 +140,17 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             var resources = await Testing.RunAsync<BlobCollectionStackFolderNoFiles>();
 
             // Assert
-            resources.Length.Should().Be(2);
+            resources.Length.Should().Be(3);
             var blobCollection = resources.OfType<BlobCollection>().FirstOrDefault();
 
             Assert.NotNull(blobCollection);
             blobCollection.GetResourceName().Should().Be("test");
+
+            var blobs = resources.OfType<Blob>().ToList();
+            Assert.NotNull(blobs);
+
+            blobs.Count.Should().Be(1);
+            blobs[0].Name.GetValue().Should().Be("0.txt");
         }
 
         [Fact]
@@ -154,7 +160,7 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             var resources = await Testing.RunAsync<BlobCollectionStackFolderWithFiles>();
 
             // Assert
-            resources.Length.Should().Be(6);
+            resources.Length.Should().Be(7);
             var blobCollection = resources.OfType<BlobCollection>().FirstOrDefault();
 
             Assert.NotNull(blobCollection);
@@ -163,12 +169,13 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             var blobs = resources.OfType<Blob>().ToList();
             Assert.NotNull(blobs);
 
-            blobs.Count.Should().Be(4);
+            blobs.Count.Should().Be(5);
 
             blobs[0].Name.GetValue().Should().Be("files.zip");
             blobs[1].Name.GetValue().Should().Be("HtmlFile1.html");
             blobs[2].Name.GetValue().Should().Be("TextFile1.txt");
             blobs[3].Name.GetValue().Should().Be("x\\TextFile3.txt");
+            blobs[4].Name.GetValue().Should().Be("y\\0.txt");
         }
 
         [Fact]
@@ -178,11 +185,17 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             var resources = await Testing.RunAsync<BlobCollectionStackEmptyFile>();
 
             // Assert
-            resources.Length.Should().Be(2);
+            resources.Length.Should().Be(3);
             var blobCollection = resources.OfType<BlobCollection>().FirstOrDefault();
 
             Assert.NotNull(blobCollection);
             blobCollection.GetResourceName().Should().Be("test");
+
+            var blobs = resources.OfType<Blob>().ToList();
+            Assert.NotNull(blobs);
+
+            blobs.Count.Should().Be(1);
+            blobs[0].Name.GetValue().Should().Be("0.txt");
         }
 
         [Fact]
