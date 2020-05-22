@@ -1,3 +1,6 @@
+# 0.3.0 (22 May 2020)
+- [#3](https://github.com/StefH/Pulumi.Azure.Extensions/pull/3) - Fix for zero bytes files [bug] contributed by [StefH](https://github.com/StefH)
+
 # 0.2.0 (04 May 2020)
 - [#2](https://github.com/StefH/Pulumi.Azure.Extensions/pull/2) - Add support for a single file, add unit-tests and add azure pipelines yaml [enhancement] contributed by [StefH](https://github.com/StefH)
 
