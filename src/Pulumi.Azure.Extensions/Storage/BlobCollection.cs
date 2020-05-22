@@ -74,8 +74,7 @@ namespace Pulumi.Azure.Extensions.Storage
                 throw new ArgumentNullException(nameof(args.Source));
             }
 
-            var validFiles = GetAllFiles(args.Source).Where(f => f.fileInfo.Length > 0); // https://github.com/pulumi/pulumi-azure/issues/544
-            foreach (var (fileInfo, blobName) in validFiles)
+            foreach (var (fileInfo, blobName) in GetAllFiles(args.Source))
             {
                 var blobArgs = new BlobArgs
                 {
@@ -83,11 +82,16 @@ namespace Pulumi.Azure.Extensions.Storage
                     ContentType = MimeTypeMap.GetMimeType(fileInfo.Extension),
                     Name = blobName,
                     Parallelism = args.Parallelism,
-                    Source = new FileAsset(fileInfo.FullName),
                     StorageAccountName = args.StorageAccountName,
                     StorageContainerName = args.StorageContainerName,
                     Type = args.Type
                 };
+
+                // https://github.com/pulumi/pulumi-azure/issues/544
+                if (fileInfo.Length > 0)
+                {
+                    blobArgs.Source = new FileAsset(fileInfo.FullName);
+                }
 
                 var blobOptions = new CustomResourceOptions
                 {
