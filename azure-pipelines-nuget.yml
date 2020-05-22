@@ -22,7 +22,6 @@ steps:
 
 - task: DotNetCoreCLI@2
   displayName: Pack
-  condition: and(succeeded())
   inputs:
     command: pack
     configuration: 'Release'
@@ -33,13 +32,11 @@ steps:
 
 - task: PublishBuildArtifacts@1
   displayName: Publish Artifacts
-  condition: and(succeeded())
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
 
 - task: DotNetCoreCLI@2
   displayName: Push to NuGet
-  condition: and(succeeded())
   inputs:
     command: custom
     custom: nuget
