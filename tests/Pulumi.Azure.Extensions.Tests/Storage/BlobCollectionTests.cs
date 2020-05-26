@@ -215,6 +215,7 @@ namespace Pulumi.Azure.Extensions.Tests.Storage
             Assert.NotNull(blobs);
 
             blobs.Count.Should().Be(1);
+            blobs[0].Name.GetValue().Should().Be("TextFile3.txt");
         }
 
         //[Fact]
